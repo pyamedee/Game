@@ -31,6 +31,8 @@ def combine(a1, a2, coef):
 
 def fluidize(action_name):
 
+    print(f'begin action {action_name}')
+
     with open('.\\..\\configs.json') as file:
         configs = json.load(file)
 
@@ -44,18 +46,29 @@ def fluidize(action_name):
         img2 = img1
         img1 = Image.open(img_path)
 
+        tab1 = np.array(img1)[47:47 + 64, 13:13 + 64, :]
         if img2 is not None:
-            tab1 = np.array(img1)
-            tab2 = np.array(img2)
-            tab_inter1 = combine(tab1, tab2, 0.66)
-            tab_inter2 = combine(tab1, tab2, 0.33)
-            # tab_inter3 = combine(tab1, tab2, 0.25)
+            tab2 = np.array(img2)[47:47 + 64, 13:13 + 64, :]
+            tab_inter1 = combine(tab1, tab2, 0.75)
+            tab_inter2 = combine(tab1, tab2, 0.5)
+            tab_inter3 = combine(tab1, tab2, 0.25)
             img_list.append(Image.fromarray(tab_inter1))
             img_list.append(Image.fromarray(tab_inter2))
-            # img_list.append(Image.fromarray(tab_inter3))
-        img_list.append(img1)
+            img_list.append(Image.fromarray(tab_inter3))
+
+        img_list.append(Image.fromarray(tab1))
 
     os.mkdir(write_path)
     for i, image in enumerate(img_list):
-        image.save(f'{write_path}/Attack{i:0>2}.png')
+        image.save(f'{write_path}/{action_name}{i:0>3}.png')
+
+
+if __name__ == '__main__':
+    # fluidize('Climb')
+
+    a = input('Confirm [Y]es/[N]o :')
+    if a.lower() == 'y':
+        for action in ['Attack', 'Attack_Extra', 'Climb', 'Death',
+                       'High_Jump', 'Hurt', 'Idle', 'Jump', 'Push', 'Run', 'Run_Attack', 'Walk', 'Walk_Attack']:
+            fluidize(action)
 

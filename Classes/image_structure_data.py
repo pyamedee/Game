@@ -7,6 +7,23 @@ import os
 from .constants import *
 
 
+anchors = {
+    ATTACK: (64, 32, 0),
+    EXTRA_ATTACK: (64, 32, 0),
+    CLIMB: (64, 32, 0),
+    DEATH: (256, 128, 104),
+    HIGH_JUMP: (128, 49, 15),
+    HURT: (128, 43, 15),
+    IDLE: (128, 43, 15),
+    JUMP: (128, 43, 15),
+    PUSH: (128, 43, 15),
+    RUN: (128, 43, 15),
+    RUN_ATTACK: (128, 43, 18),
+    WALK: (128, 43, 15),
+    WALK_ATTACK: (128, 43, 18)
+}
+
+
 class ImageDictionary(dict):
     ENTITY = 0b0001
     BG = 0b0010
@@ -53,7 +70,7 @@ class ImageDictionary(dict):
         pgres.path = ['Resources']
         pgres.reindex()
         self.res = res_directory
-        self.anim_freq = 1 / 30
+        self.anim_freq = 1 / 40
 
         options = {
             'Background': self.parse_bg,
@@ -70,7 +87,7 @@ class ImageDictionary(dict):
             for i, layer in enumerate(glob(bg + '/*.png')):
                 layer_id = (i + 1) * VARIATION
                 image_id = BG | bg_id | layer_id
-                self[image_id] = pgimg.load(layer)
+                self[image_id] = pgimg.load(layer)  # pgimg : pyglet.image
 
     def parse_entity(self, folder):
         # each action can be accessed with ENTITY | <ENTITY_NAME> | <ACTION_NAME> (| FLIPPED)
@@ -87,16 +104,25 @@ class ImageDictionary(dict):
                 img_list = list()
                 rimg_list = list()
                 for img in glob(action + '/*.png'):
-                    img_list.append(pgimg.load(img))
-                    rimg_list.append(pgres.image(self.convert_path(img), flip_x=True))
+                    image = pgimg.load(img)
+                    image.anchor_x = anchors[action_id][1]
+                    image.anchor_y = anchors[action_id][2]
+                    img_list.append(image)  # pgimg : pyglet.image
 
-                anim = pgimg.Animation.from_image_sequence(img_list, self.anim_freq, False)
-                ranim = pgimg.Animation.from_image_sequence(rimg_list, self.anim_freq, False)
+                    rimage = pgres.image(self.convert_path(img), flip_x=True)
+                    rimage.anchor_x = anchors[action_id][0] - anchors[action_id][1]
+                    rimage.anchor_y = anchors[action_id][2]
+                    rimg_list.append(rimage)  # pygres : pyglet.resource
+
+                anim = pgimg.Animation.from_image_sequence(img_list, self.anim_freq, True)
+                ranim = pgimg.Animation.from_image_sequence(rimg_list, self.anim_freq, True)
                 self[ENTITY | entity_id | action_id] = anim
                 self[ENTITY | entity_id | action_id | FLIPPED] = ranim
 
     @staticmethod
     def convert_path(path):
+        """converti le chemin en un chemin spécial contraint par pyglet.resource.image"""
+
         i = path.index('Resources') + len('Resources/')
         relative_path = path.replace(path[:i], '')
         return relative_path.replace('\\', '/')
