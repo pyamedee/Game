@@ -53,7 +53,7 @@ class ImageDictionary(dict):
         pgres.path = ['Resources']
         pgres.reindex()
         self.res = res_directory
-        self.anim_freq = 1 / 35
+        self.anim_freq = 1 / 30
 
         options = {
             'Background': self.parse_bg,

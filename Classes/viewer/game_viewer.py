@@ -9,9 +9,9 @@ from ..constants import *
 
 
 class GameViewer(BaseViewer):
-    def __init__(self, model, width, height, window=None, config=None):
+    def __init__(self, config, model, width, height, window=None):
         if not window:
-            window = pyglet.window.Window(width=width, height=height, config=config)
+            window = pyglet.window.Window(width=width, height=height)
         else:
             window.set_size(width, height)
         super(GameViewer, self).__init__(model, window)
@@ -20,7 +20,7 @@ class GameViewer(BaseViewer):
         self.bg = pyglet.graphics.OrderedGroup(0)
         self.front = pyglet.graphics.OrderedGroup(1)
 
-        self.img_dict = ImageDictionary('C:/Users/Hélène Le Berre/rp/Game/Resources')
+        self.img_dict = ImageDictionary(config['resources_path'])
 
         bg = pyglet.sprite.Sprite(self.img_dict[BG | BLACK_FOREST | LAYER10], 0, 0, batch=self.batch, group=self.bg)
         bg_handler = ImageHandler(self.img_dict)

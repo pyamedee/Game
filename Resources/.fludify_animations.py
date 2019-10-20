@@ -4,6 +4,7 @@ from PIL import Image
 from glob import glob
 import numpy as np
 import os
+import json
 
 
 def combine(a1, a2, coef):
@@ -28,27 +29,33 @@ def combine(a1, a2, coef):
     return new_array
 
 
-path = r'C:\Users\Hélène Le Berre\rp\Game\ResourcesBase\Entity\Rogue\Attack'
+def fluidize(action_name):
 
-img_list = list()
-img1 = None
-img2 = None
-for img_path in glob(path + '\\*.png'):
-    img2 = img1
-    img1 = Image.open(img_path)
+    with open('.\\..\\configs.json') as file:
+        configs = json.load(file)
 
-    if img2 is not None:
-        tab1 = np.array(img1)
-        tab2 = np.array(img2)
-        tab_inter1 = combine(tab1, tab2, 0.66)
-        tab_inter2 = combine(tab1, tab2, 0.33)
-        # tab_inter3 = combine(tab1, tab2, 0.25)
-        img_list.append(Image.fromarray(tab_inter1))
-        img_list.append(Image.fromarray(tab_inter2))
-        # img_list.append(Image.fromarray(tab_inter3))
-    img_list.append(img1)
+    path = configs['base_resources_path'] + '/Entity/Rogue/' + action_name
+    write_path = configs['resources_path'] + '/Entity/Rogue/' + action_name
 
-os.mkdir('C:\\Users\\Hélène Le Berre\\rp\\Game\\Resources\\Entity\\Rogue\\Attack2')
-for i, image in enumerate(img_list):
-    image.save(f'C:\\Users\\Hélène Le Berre\\rp\\Game\\Resources\\Entity\\Rogue\\Attack2\\Attack{i:0>2}.png')
+    img_list = list()
+    img1 = None
+    img2 = None
+    for img_path in glob(path + '\\*.png'):
+        img2 = img1
+        img1 = Image.open(img_path)
+
+        if img2 is not None:
+            tab1 = np.array(img1)
+            tab2 = np.array(img2)
+            tab_inter1 = combine(tab1, tab2, 0.66)
+            tab_inter2 = combine(tab1, tab2, 0.33)
+            # tab_inter3 = combine(tab1, tab2, 0.25)
+            img_list.append(Image.fromarray(tab_inter1))
+            img_list.append(Image.fromarray(tab_inter2))
+            # img_list.append(Image.fromarray(tab_inter3))
+        img_list.append(img1)
+
+    os.mkdir(write_path)
+    for i, image in enumerate(img_list):
+        image.save(f'{write_path}/Attack{i:0>2}.png')
 
